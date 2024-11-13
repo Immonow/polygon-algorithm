@@ -39,13 +39,7 @@ class Algorithm
 
     public const EDGE_TYPE_DIFFERENT_TRANSITION = 4;
 
-    /**
-     * Deque
-     *
-     * @var array
-     *
-     * @deprecated
-     */
+    /** @var SweepEvent[] */
     protected $event_holder = [];
 
     protected PriorityQueue $eq;
