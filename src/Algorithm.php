@@ -1,4 +1,5 @@
 <?php
+
 namespace MartinezRueda;
 
 /**
@@ -7,30 +8,38 @@ namespace MartinezRueda;
  * k is number of intersections of all polygon edges
  *
  * Also Bentley - Ottmann algorithm is used for search of intersections
+ *
  * @link https://en.wikipedia.org/wiki/Bentley%E2%80%93Ottmann_algorithm
  *
  * Class Algorithm
- * @package MartinezRueda
  */
 class Algorithm
 {
     const OPERATION_INTERSECTION = 'INTERSECTION';
+
     const OPERATION_UNION = 'UNION';
+
     const OPERATION_DIFFERENCE = 'DIFFERENCE';
+
     const OPERATION_XOR = 'XOR';
 
     const POLYGON_TYPE_SUBJECT = 1;
+
     const POLYGON_TYPE_CLIPPING = 2;
 
     const EDGE_TYPE_NORMAL = 1;
+
     const EDGE_TYPE_NON_CONTRIBUTING = 2;
+
     const EDGE_TYPE_SAME_TRANSITION = 3;
+
     const EDGE_TYPE_DIFFERENT_TRANSITION = 4;
 
     /**
      * Deque
      *
      * @var array
+     *
      * @deprecated
      */
     protected $event_holder = [];
@@ -42,57 +51,33 @@ class Algorithm
 
     public function __construct()
     {
-        $this->eq = new PriorityQueue();
+        $this->eq = new PriorityQueue;
     }
 
-    /**
-     * @param Polygon $subject
-     * @param Polygon $clipping
-     * @return Polygon
-     */
-    public function getDifference(Polygon $subject, Polygon $clipping) : Polygon
+    public function getDifference(Polygon $subject, Polygon $clipping): Polygon
     {
         return $this->compute($subject, $clipping, self::OPERATION_DIFFERENCE);
     }
 
-    /**
-     * @param Polygon $subject
-     * @param Polygon $clipping
-     * @return Polygon
-     */
-    public function getUnion(Polygon $subject, Polygon $clipping) : Polygon
+    public function getUnion(Polygon $subject, Polygon $clipping): Polygon
     {
         return $this->compute($subject, $clipping, self::OPERATION_UNION);
     }
 
-    /**
-     * @param Polygon $subject
-     * @param Polygon $clipping
-     * @return Polygon
-     */
-    public function getIntersection(Polygon $subject, Polygon $clipping) : Polygon
+    public function getIntersection(Polygon $subject, Polygon $clipping): Polygon
     {
         return $this->compute($subject, $clipping, self::OPERATION_INTERSECTION);
     }
 
-    /**
-     * @param Polygon $subject
-     * @param Polygon $clipping
-     * @return Polygon
-     */
-    public function getXor(Polygon $subject, Polygon $clipping) : Polygon
+    public function getXor(Polygon $subject, Polygon $clipping): Polygon
     {
         return $this->compute($subject, $clipping, self::OPERATION_XOR);
     }
 
-    /**
-     * @param Polygon $subject
-     * @param Polygon $clipping
-     * @param string $operation
-     * @return Polygon
-     */
-    protected function compute(Polygon $subject, Polygon $clipping, string $operation) : Polygon
+    protected function compute(Polygon $subject, Polygon $clipping, string $operation): Polygon
     {
+        //For return a empty Polygon when there is no intersection inter the  $subject and $clipping !!!!
+        $result = new Polygon([]);
         // Test for 1 trivial result case
         if ($subject->ncontours() * $clipping->ncontours() == 0) {
             if ($operation == self::OPERATION_DIFFERENCE) {
@@ -124,9 +109,8 @@ class Algorithm
 
             if ($operation == self::OPERATION_UNION || $operation == self::OPERATION_XOR) {
                 $result = $subject;
-
                 for ($i = 0; $i < $clipping->ncontours(); $i++) {
-                    $result[] = $clipping->contour($i);
+                    $result->push_back($clipping->contour($i));
                 }
             }
 
@@ -148,8 +132,8 @@ class Algorithm
             }
         }
 
-        $connector = new Connector();
-        $sweepline = new SweepLine();
+        $connector = new Connector;
+        $sweepline = new SweepLine;
 
         $min_max_x = min($maxsubj->x, $maxclip->x);
 
@@ -165,7 +149,7 @@ class Algorithm
             }
         );
 
-        while (!$this->eq->isEmpty()) {
+        while (! $this->eq->isEmpty()) {
             $e = $this->eq->dequeue();
 
             Debug::debug(
@@ -178,6 +162,7 @@ class Algorithm
             if (($operation == self::OPERATION_INTERSECTION && ($e->p->x > $min_max_x))
                 || ($operation == self::OPERATION_DIFFERENCE && ($e->p->x > $maxsubj->x))) {
                 $result = $connector->toPolygon();
+
                 return $result;
             }
 
@@ -212,18 +197,18 @@ class Algorithm
                         $prev2 = $sweepline->get($position - 2);
 
                         if ($prev->polygon_type == $e->polygon_type) {
-                            $e->in_out = !$prev->in_out;
-                            $e->inside = !$prev2->in_out;
+                            $e->in_out = ! $prev->in_out;
+                            $e->inside = ! $prev2->in_out;
                         } else {
-                            $e->in_out = !$prev2->in_out;
-                            $e->inside = !$prev->in_out;
+                            $e->in_out = ! $prev2->in_out;
+                            $e->inside = ! $prev->in_out;
                         }
                     }
                 } elseif ($e->polygon_type == $prev->polygon_type) {
                     $e->inside = $prev->inside;
-                    $e->in_out = !$prev->in_out;
+                    $e->in_out = ! $prev->in_out;
                 } else {
-                    $e->inside = !$prev->in_out;
+                    $e->inside = ! $prev->in_out;
                     $e->in_out = $prev->inside;
                 }
 
@@ -239,11 +224,11 @@ class Algorithm
                     }
                 );
 
-                if (!is_null($next)) {
+                if (! is_null($next)) {
                     $this->possibleIntersection($e, $next);
                 }
 
-                if (!is_null($prev)) {
+                if (! is_null($prev)) {
                     $this->possibleIntersection($prev, $e);
                 }
             } else { // not left, the line segment must be removed from S
@@ -265,7 +250,7 @@ class Algorithm
 
                     $next = null;
 
-                    if ($other_pos < sizeof($sweepline->events) - 1) {
+                    if ($other_pos < count($sweepline->events) - 1) {
                         $next = $sweepline->get($other_pos + 1);
                     }
                 }
@@ -282,14 +267,14 @@ class Algorithm
                                 break;
 
                             case self::OPERATION_UNION:
-                                if (!$e->other->inside) {
+                                if (! $e->other->inside) {
                                     $connector->add($e->segment());
                                 }
 
                                 break;
 
                             case self::OPERATION_DIFFERENCE:
-                                if ($e->polygon_type == self::POLYGON_TYPE_SUBJECT && !$e->other->inside
+                                if ($e->polygon_type == self::POLYGON_TYPE_SUBJECT && ! $e->other->inside
                                     || $e->polygon_type == self::POLYGON_TYPE_CLIPPING && $e->other->inside) {
                                     $connector->add($e->segment());
                                 }
@@ -322,7 +307,7 @@ class Algorithm
                     $sweepline->remove($sweepline->get($other_pos));
                 }
 
-                if (!is_null($next) && !is_null($prev)) {
+                if (! is_null($next) && ! is_null($prev)) {
                     $this->possibleIntersection($next, $prev);
                 }
 
@@ -338,14 +323,7 @@ class Algorithm
         return $connector->toPolygon();
     }
 
-    /**
-     * @param Segment $segment0
-     * @param Segment $segment1
-     * @param Point $pi0
-     * @param Point $pi1
-     * @return int
-     */
-    protected function findIntersection(Segment $segment0, Segment $segment1, Point &$pi0, Point &$pi1) : int
+    protected function findIntersection(Segment $segment0, Segment $segment1, Point &$pi0, Point &$pi1): int
     {
         $p0 = $segment0->begin();
         $d0 = new Point($segment0->end()->x - $p0->x, $segment0->end()->y - $p0->y);
@@ -439,15 +417,7 @@ class Algorithm
         return $imax;
     }
 
-    /**
-     * @param float $u0
-     * @param float $u1
-     * @param float $v0
-     * @param float $v1
-     * @param array $w
-     * @return int
-     */
-    protected function findIntersection2(float $u0, float $u1, float $v0, float $v1, array &$w) : int
+    protected function findIntersection2(float $u0, float $u1, float $v0, float $v1, array &$w): int
     {
         if ($u1 < $v0 || $u0 > $v1) {
             return 0;
@@ -461,17 +431,17 @@ class Algorithm
                 return 2;
             } else {
                 $w[0] = $u0;
+
                 return 1;
             }
         } else {
             $w[0] = $u1;
+
             return 1;
         }
     }
 
     /**
-     * @param SweepEvent $event1
-     * @param SweepEvent $event2
      * @throws \Exception
      */
     protected function possibleIntersection(SweepEvent $event1, SweepEvent $event2)
@@ -481,8 +451,8 @@ class Algorithm
         //    return false;
         // }
 
-        $ip1 = new Point();
-        $ip2 = new Point();
+        $ip1 = new Point;
+        $ip2 = new Point;
 
         $intersections = $this->findIntersection($event1->segment(), $event2->segment(), $ip1, $ip2);
 
@@ -501,11 +471,11 @@ class Algorithm
         }
 
         if ($intersections == 1) {
-            if (!$event1->p->equalsTo($ip1) && !$event1->other->p->equalsTo($ip1)) {
+            if (! $event1->p->equalsTo($ip1) && ! $event1->other->p->equalsTo($ip1)) {
                 $this->divideSegment($event1, $ip1);
             }
 
-            if (!$event2->p->equalsTo($ip1) && !$event2->other->p->equalsTo($ip1)) {
+            if (! $event2->p->equalsTo($ip1) && ! $event2->other->p->equalsTo($ip1)) {
                 $this->divideSegment($event2, $ip1);
             }
 
@@ -535,7 +505,7 @@ class Algorithm
             $sorted_events[] = $event2->other;
         }
 
-        if (sizeof($sorted_events) == 2) {
+        if (count($sorted_events) == 2) {
             $event1->edge_type = $event1->other->edge_type = self::EDGE_TYPE_NON_CONTRIBUTING;
             $event2->edge_type = $event2->other->edge_type = ($event1->in_out == $event2->in_out)
                 ? self::EDGE_TYPE_SAME_TRANSITION
@@ -544,7 +514,7 @@ class Algorithm
             return;
         }
 
-        if (sizeof($sorted_events) == 3) {
+        if (count($sorted_events) == 3) {
             $sorted_events[1]->edge_type = $sorted_events[1]->other->edge_type = self::EDGE_TYPE_NON_CONTRIBUTING;
 
             if ($sorted_events[0]) {
@@ -562,7 +532,7 @@ class Algorithm
             return;
         }
 
-        if (!$sorted_events[0]->equalsTo($sorted_events[3]->other)) {
+        if (! $sorted_events[0]->equalsTo($sorted_events[3]->other)) {
             $sorted_events[1]->type = self::EDGE_TYPE_NON_CONTRIBUTING;
             $sorted_events[2]->type = ($event1->in_out == $event2->in_out)
                 ? self::EDGE_TYPE_SAME_TRANSITION
@@ -585,15 +555,12 @@ class Algorithm
 
     /**
      * Add element to the end of dequeue
-     *
-     * @param SweepEvent $event
-     * @return SweepEvent
      */
-    protected function storeSweepEvent(SweepEvent $event) : SweepEvent
+    protected function storeSweepEvent(SweepEvent $event): SweepEvent
     {
         $this->event_holder[] = $event;
 
-        return $this->event_holder[sizeof($this->event_holder) - 1];
+        return $this->event_holder[count($this->event_holder) - 1];
     }
 
     protected function divideSegment(SweepEvent $event, Point $point)
@@ -607,7 +574,7 @@ class Algorithm
         }
 
         //if (Helper::compareSweepEvents($event, $right)) {
-            // nothing
+        // nothing
         //}
 
         $event->other->other = $left;
@@ -618,8 +585,6 @@ class Algorithm
     }
 
     /**
-     * @param Segment $segment
-     * @param int $polygon_type
      * @return void
      */
     protected function processSegment(Segment $segment, int $polygon_type)

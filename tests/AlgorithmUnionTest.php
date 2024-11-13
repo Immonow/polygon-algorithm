@@ -6,7 +6,7 @@ class AlgorithmUnionTest extends \PHPUnit\Framework\TestCase
 {
     protected $implementation = null;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->implementation = new Algorithm();
     }

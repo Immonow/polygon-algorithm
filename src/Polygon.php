@@ -1,9 +1,9 @@
 <?php
+
 namespace MartinezRueda;
 
 /**
  * Class Polygon
- * @package MartinezRueda
  */
 class Polygon
 {
@@ -18,13 +18,11 @@ class Polygon
      * []point = [x, y]
      *
      * @example $contours_xy = [[[1, 4], [4, 5], [6, 4], [1, 1]], [...]]
-     * @param array $contours_xy
      */
     public function __construct(array $contours_xy)
     {
         foreach ($contours_xy as $contour_xy) {
             $contour_points = [];
-
             foreach ($contour_xy as $xy) {
                 $contour_points[] = new Point($xy[0], $xy[1]);
             }
@@ -33,27 +31,17 @@ class Polygon
         }
     }
 
-    /**
-     * @param int $index
-     * @return Contour
-     */
-    public function contour(int $index) : Contour
+    public function contour(int $index): Contour
     {
         return $this->contours[$index];
     }
 
-    /**
-     * @return int
-     */
-    public function ncontours() : int
+    public function ncontours(): int
     {
-        return sizeof($this->contours);
+        return count($this->contours);
     }
 
-    /**
-     * @return int
-     */
-    public function nvertices() : int
+    public function nvertices(): int
     {
         $nv = 0;
 
@@ -69,7 +57,7 @@ class Polygon
      *
      * @return array ['min' => Point, 'max' => Point]
      */
-    public function getBoundingBox() : array
+    public function getBoundingBox(): array
     {
         $min_x = PHP_INT_MAX;
         $min_y = PHP_INT_MAX;
@@ -102,13 +90,11 @@ class Polygon
 
         return [
             'min' => new Point($min_x, $min_y),
-            'max' => new Point($max_x, $max_y)
+            'max' => new Point($max_x, $max_y),
         ];
     }
 
     /**
-     * @param float $x
-     * @param float $y
      * @return void
      */
     public function move(float $x, float $y)
@@ -118,9 +104,6 @@ class Polygon
         }
     }
 
-    /**
-     * @param Contour $contour
-     */
     public function push_back(Contour $contour)
     {
         $this->contours[] = $contour;
@@ -132,7 +115,6 @@ class Polygon
     }
 
     /**
-     * @param int $index
      * @return void
      */
     public function erase(int $index)
@@ -148,7 +130,7 @@ class Polygon
         unset($this->contours);
     }
 
-    public function toArray() : array
+    public function toArray(): array
     {
         if (empty($this->contours)) {
             return [];

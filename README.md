@@ -1,11 +1,14 @@
-## Martinez-Rueda polygon boolean operations algorithm
+# Martinez-Rueda polygon boolean operations algorithm
 PHP implementation of original algorithm <http://www4.ujaen.es/~fmartin/bool_op.html>
+
+Forked from <https://github.com/kudm761/martinez-rueda-php> and updated to php 8.
 
 Algorithm is used for computing Boolean operations on polygons:
 - union
 - difference
 - intersection
 - xor
+
 ## Usage
 Input parameter is a multipolygon - an array of polygons. And each polygon is an array of points x,y.
 ```
