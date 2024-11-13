@@ -1,5 +1,10 @@
 <?php
+
+declare(strict_types=1);
+
 namespace MartinezRueda;
+
+use InvalidArgumentException;
 
 /**
  * Contour represents a sequence of vertices connected by line segments, forming a closed shape.
@@ -10,12 +15,14 @@ namespace MartinezRueda;
 class Contour
 {
     public $points = [];
+
     protected $holes = [];
 
     protected $is_external = false;
+
     protected $cc = false;
 
-    protected $precomputed_cc = null;
+    protected $precomputed_cc;
 
     public function __construct(array $points)
     {
@@ -24,92 +31,75 @@ class Contour
         }
     }
 
-    public function add(Point $p)
+    public function add(Point $p): void
     {
         $this->points[] = $p;
     }
 
-    public function erase(int $index)
+    public function erase(int $index): void
     {
         if (!isset($this->points[$index])) {
-            throw new \InvalidArgumentException(sprintf('Undefined points offset `%s`', $index));
+            throw new InvalidArgumentException(sprintf('Undefined points offset `%s`', $index));
         }
 
         unset($this->points[$index]);
     }
 
-    public function clear()
+    public function clear(): void
     {
         $this->points = [];
         $this->holes = [];
     }
 
-    public function addHole(int $index)
+    public function addHole(int $index): void
     {
         $this->holes[] = $index;
     }
 
     /**
      * Get the p-th vertex of the external contour
-     *
-     * @param int $p
-     * @return Point
      */
-    public function vertex(int $p) : Point
+    public function vertex(int $p): Point
     {
         if (!isset($this->points[$p])) {
-            throw new \InvalidArgumentException('Undefined index offset.');
+            throw new InvalidArgumentException('Undefined index offset.');
         }
 
         return $this->points[$p];
     }
 
-    /**
-     * @param int $p
-     * @return Segment
-     */
-    public function segment(int $p) : Segment
+    public function segment(int $p): Segment
     {
-        if ($p == $this->nvertices() - 1) {
+        if ($p === $this->nvertices() - 1) {
             // last, first
-            return new Segment($this->points[sizeof($this->points) - 1], $this->points[0]);
+            return new Segment($this->points[count($this->points) - 1], $this->points[0]);
         }
 
         return new Segment($this->points[$p], $this->points[$p + 1]);
     }
 
-    /**
-     * @return int
-     */
-    public function nvertices() : int
+    public function nvertices(): int
     {
-        return sizeof($this->points);
+        return count($this->points);
+    }
+
+    public function nedges(): int
+    {
+        return count($this->points);
+    }
+
+    public function nholes(): int
+    {
+        return count($this->holes);
     }
 
     /**
-     * @return int
-     */
-    public function nedges() : int
-    {
-        return sizeof($this->points);
-    }
-
-    /**
-     * @return int
-     */
-    public function nholes() : int
-    {
-        return sizeof($this->holes);
-    }
-
-    /**
-     * @param int $index
      * @return mixed
      */
     public function hole(int $index)
     {
         if (!isset($this->holes[$index])) {
-            throw new \InvalidArgumentException(sprintf('Undefined holes offset `%s`', $index));
+            throw new InvalidArgumentException(sprintf('Undefined holes offset `%s`', $index));
         }
 
         return $this->holes[$index];
@@ -120,7 +110,7 @@ class Contour
      *
      * @return array ['min' => Point, 'max' => Point]
      */
-    public function getBoundingBox() : array
+    public function getBoundingBox(): array
     {
         $min_x = PHP_INT_MAX;
         $min_y = PHP_INT_MAX;
@@ -128,7 +118,7 @@ class Contour
         $max_x = PHP_INT_MIN;
         $max_y = PHP_INT_MIN;
 
-        foreach ($this->points as $k => $point) {
+        foreach ($this->points as $point) {
             if ($point->x < $min_x) {
                 $min_x = $point->x;
             }
@@ -152,7 +142,7 @@ class Contour
         ];
     }
 
-    public function counterClockwise() : bool
+    public function counterClockwise(): bool
     {
         if (!is_null($this->precomputed_cc)) {
             return $this->precomputed_cc;
@@ -175,46 +165,42 @@ class Contour
         return $this->cc;
     }
 
-    public function clockwise() : bool
+    public function clockwise(): bool
     {
         return !$this->counterClockwise();
     }
 
-    public function changeOrientation()
+    public function changeOrientation(): void
     {
         $this->points = array_reverse($this->points);
         $this->cc = !$this->cc;
     }
 
-    public function setClockwise()
+    public function setClockwise(): void
     {
         if ($this->counterClockwise()) {
             $this->changeOrientation();
         }
     }
 
-    public function setCounterClockwise()
+    public function setCounterClockwise(): void
     {
         if ($this->clockwise()) {
             $this->changeOrientation();
         }
     }
 
-    public function external() : bool
+    public function external(): bool
     {
         return $this->is_external;
     }
 
-    public function setExternal(bool $flag)
+    public function setExternal(bool $flag): void
     {
         $this->is_external = $flag;
     }
 
-    /**
-     * @param float $x
-     * @param float $y
-     */
-    public function move(float $x, float $y)
+    public function move(float $x, float $y): void
     {
         for ($i = 0; $i < $this->nvertices(); $i++) {
             $this->points[$i]->x += $x;

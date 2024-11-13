@@ -1,5 +1,10 @@
 <?php
+
+declare(strict_types=1);
+
 namespace MartinezRueda;
+
+use InvalidArgumentException;
 
 /**
  * We use a vertical line to sweep the plane from left to right.
@@ -22,29 +27,24 @@ class SweepLine
      */
     public $events = [];
 
-    public function size() : int
+    public function size(): int
     {
-        return sizeof($this->events);
+        return count($this->events);
     }
 
     /**
      * @param $index
-     * @return SweepEvent
      */
-    public function get($index) : SweepEvent
+    public function get($index): SweepEvent
     {
         if (!isset($this->events[$index])) {
-            throw new \InvalidArgumentException(sprintf('Undefined SweepLine->events offset `%s`', $index));
+            throw new InvalidArgumentException(sprintf('Undefined SweepLine->events offset `%s`', $index));
         }
 
         return $this->events[$index];
     }
 
-    /**
-     * @param SweepEvent $removable
-     * @return void
-     */
-    public function remove(SweepEvent $removable)
+    public function remove(SweepEvent $removable): void
     {
         foreach ($this->events as $index => $item) {
             if ($item->equalsTo($removable)) {
@@ -54,19 +54,15 @@ class SweepLine
         }
     }
 
-    /**
-     * @param SweepEvent $event
-     * @return int
-     */
-    public function insert(SweepEvent $event) : int
+    public function insert(SweepEvent $event): int
     {
-        if (sizeof($this->events) == 0) {
+        if (count($this->events) == 0) {
             $this->events[] = $event;
             return 0;
         }
 
         // priority queue is sorted, shift elements to the right and find place for event
-        for ($i = sizeof($this->events) - 1; $i >= 0 && $this->compare($event, $this->events[$i]); $i--) {
+        for ($i = count($this->events) - 1; $i >= 0 && $this->compare($event, $this->events[$i]); $i--) {
             $this->events[$i + 1] = $this->events[$i];
         }
 
@@ -75,12 +71,7 @@ class SweepLine
         return $i + 1;
     }
 
-    /**
-     * @param SweepEvent $event1
-     * @param SweepEvent $event2
-     * @return bool
-     */
-    public function compare(SweepEvent $event1, SweepEvent $event2) : bool
+    public function compare(SweepEvent $event1, SweepEvent $event2): bool
     {
         return Helper::compareSegments($event1, $event2);
     }

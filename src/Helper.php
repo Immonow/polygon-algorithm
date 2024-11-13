@@ -1,5 +1,10 @@
 <?php
+
+declare(strict_types=1);
+
 namespace MartinezRueda;
+
+use InvalidArgumentException;
 
 /**
  * Class Helper
@@ -9,13 +14,8 @@ class Helper
 {
     /**
      * Signed area of the triangle (p0, p1, p2)
-     *
-     * @param Point $p0
-     * @param Point $p1
-     * @param Point $p2
-     * @return float
      */
-    public static function signedArea(Point $p0, Point $p1, Point $p2) : float
+    public static function signedArea(Point $p0, Point $p1, Point $p2): float
     {
         return ($p0->x - $p2->x) * ($p1->y - $p2->y) - ($p1->x - $p2->x) * ($p0->y - $p2->y);
     }
@@ -27,12 +27,8 @@ class Helper
      * If two left endpoints share the same point then they must be processed
      * in the ascending order of their associated edges in SweepLine
      *
-     *
-     * @param SweepEvent $event1
-     * @param SweepEvent $event2
-     * @return bool
      */
-    public static function compareSweepEvents(SweepEvent $event1, SweepEvent $event2) : bool
+    public static function compareSweepEvents(SweepEvent $event1, SweepEvent $event2): bool
     {
         // x is not the same
         if ($event1->p->x > $event2->p->x) {
@@ -60,12 +56,7 @@ class Helper
         return $event1->above($event2->other->p);
     }
 
-    /**
-     * @param SweepEvent $event1
-     * @param SweepEvent $event2
-     * @return bool
-     */
-    public static function compareSegments(SweepEvent $event1, SweepEvent $event2) : bool
+    public static function compareSegments(SweepEvent $event1, SweepEvent $event2): bool
     {
         if ($event1->equalsTo($event2)) {
             return false;
@@ -96,40 +87,34 @@ class Helper
 
     /**
      * Remove $index element and maintain indexing.
-     *
-     * @param array $array
-     * @param int $index
-     * @return void
      */
-    public static function removeElementWithShift(array &$array, int $index)
+    public static function removeElementWithShift(array &$array, int $index): void
     {
         if (!isset($array[$index])) {
             $message = sprintf('Undefined index offset: `%s` in array %s.', $index, print_r($array, true));
-            throw new \InvalidArgumentException($message);
+            throw new InvalidArgumentException($message);
         }
 
         unset($array[$index]);
         $array = array_values($array);
-
-        return;
     }
 
     /**
-     * @param array $expected_multipolygon
-     * @param array $tested_multipolygon
      * @return int
      */
-    public static function compareMultiPolygons(array $expected_multipolygon, array $tested_multipolygon) : array
+    public static function compareMultiPolygons(array $expected_multipolygon, array $tested_multipolygon): array
     {
-        if (sizeof($expected_multipolygon) != sizeof($tested_multipolygon)) {
+        if (count($expected_multipolygon) !== count($tested_multipolygon)) {
             return ['success' => false, 'reason' => 'different count of polygons'];
         }
 
-        if (sizeof($expected_multipolygon) == 0 && sizeof($tested_multipolygon) == 0) {
+        if (count($expected_multipolygon) == 0 && count($tested_multipolygon) == 0) {
             return ['success' => true, 'reason' => ''];
         }
 
-        for ($i = 0; $i < sizeof($expected_multipolygon); $i++) {
+        $counter = count($expected_multipolygon);
+
+        for ($i = 0; $i < $counter; $i++) {
             $expected_polygon = $expected_multipolygon[$i];
 
             if (!isset($tested_multipolygon[$i])) {
@@ -142,7 +127,7 @@ class Helper
             $tested_polygon = $tested_multipolygon[$i];
 
             // walk through the points
-            for ($j = 0, $size = sizeof($expected_polygon); $j < $size; $j++) {
+            for ($j = 0, $size = count($expected_polygon); $j < $size; $j++) {
                 if (!isset($tested_polygon[$j])) {
                     return [
                         'success' => false,
@@ -157,7 +142,7 @@ class Helper
                 $expected_point = $expected_polygon[$j];
                 $tested_point = $tested_polygon[$j];
 
-                if (bccomp($expected_point[0], $tested_point[0], 6) !== 0) {
+                if (bccomp(strval($expected_point[0]), strval($tested_point[0]), 6) !== 0) {
                     return [
                         'success' => false,
                         'reason' => sprintf(
@@ -169,7 +154,7 @@ class Helper
                     ];
                 }
 
-                if (bccomp($expected_point[1], $tested_point[1], 6) !== 0) {
+                if (bccomp(strval($expected_point[1]), strval($tested_point[1]), 6) !== 0) {
                     return [
                         'success' => false,
                         'reason' => sprintf(

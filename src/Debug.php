@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 namespace MartinezRueda;
 
 /**
@@ -9,18 +12,14 @@ class Debug
 {
     public static $debug_on = false;
 
-    public static function debug(callable $callee)
+    public static function debug(callable $callee): void
     {
         if (self::$debug_on) {
             $callee();
         }
     }
 
-    /**
-     * @param SweepEvent $event
-     * @return string
-     */
-    public static function gatherSweepEventData(SweepEvent $event) : string
+    public static function gatherSweepEventData(SweepEvent $event): string
     {
         $data = [
             'index' => $event->id,
@@ -33,11 +32,7 @@ class Debug
         return json_encode($data);
     }
 
-    /**
-     * @param Connector $connector
-     * @return string
-     */
-    public static function gatherConnectorData(Connector $connector) : string
+    public static function gatherConnectorData(Connector $connector): string
     {
         $open_polygons = [];
         $closed_polygons = [];
@@ -59,11 +54,7 @@ class Debug
         return json_encode($data);
     }
 
-    /**
-     * @param PointChain $chain
-     * @return array
-     */
-    protected function gatherPointChainData(PointChain $chain) : array
+    protected static function gatherPointChainData(PointChain $chain): array
     {
         $points = [];
 
@@ -73,11 +64,9 @@ class Debug
             }
         }
 
-        $data = [
+        return [
             'closed' => $chain->closed ? 1 : 0,
             'elements' => $points
         ];
-
-        return $data;
     }
 }

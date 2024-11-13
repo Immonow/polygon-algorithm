@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 namespace MartinezRueda;
 
 /**
@@ -8,6 +11,7 @@ namespace MartinezRueda;
 class Connector
 {
     public $open_polygons = [];
+
     public $closed_polygons = [];
 
     /**
@@ -20,13 +24,9 @@ class Connector
         return $this->closed;
     }
 
-    /**
-     * @param Segment $segment
-     * @return void
-     */
-    public function add(Segment $segment)
+    public function add(Segment $segment): void
     {
-        $size = sizeof($this->open_polygons);
+        $size = count($this->open_polygons);
 
         for ($j = 0; $j < $size; $j++) {
             $chain = $this->open_polygons[$j];
@@ -36,7 +36,7 @@ class Connector
             }
 
             if ($chain->closed) {
-                if (sizeof($chain->segments) == 2) {
+                if (count($chain->segments) == 2) {
                     $chain->closed = false;
 
                     return;
@@ -50,7 +50,7 @@ class Connector
             }
 
             // if chain not closed
-            $k = sizeof($this->open_polygons);
+            $k = count($this->open_polygons);
 
             for ($i = $j + 1; $i < $k; $i++) {
                 $v = $this->open_polygons[$i];
@@ -71,9 +71,6 @@ class Connector
         $this->open_polygons[] = $new_chain;
     }
 
-    /**
-     * @return Polygon
-     */
     public function toPolygon() : Polygon
     {
         $contours = [];

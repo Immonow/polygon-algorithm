@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 namespace MartinezRueda;
 
 /**
@@ -8,21 +11,18 @@ namespace MartinezRueda;
 class PointChain
 {
     public $segments = [];
+
     public $closed = false;
 
     /**
      * PointChain constructor.
-     * @param array $segments
      */
     public function __construct(array $segments = [])
     {
         $this->segments = $segments;
     }
 
-    /**
-     * @param Segment $segment
-     */
-    public function init(Segment $segment)
+    public function init(Segment $segment): void
     {
         $this->segments[] = $segment->begin();
         $this->segments[] = $segment->end();
@@ -44,19 +44,12 @@ class PointChain
         return $this->segments[$this->size() - 1];
     }
 
-    /**
-     * @return int
-     */
-    public function size() : int
+    public function size(): int
     {
-        return sizeof($this->segments);
+        return count($this->segments);
     }
 
-    /**
-     * @param Segment $segment
-     * @return bool
-     */
-    public function linkSegment(Segment $segment)
+    public function linkSegment(Segment $segment): bool
     {
         $front = $this->begin();
         $back = $this->end();
@@ -104,11 +97,7 @@ class PointChain
         return false;
     }
 
-    /**
-     * @param PointChain $other
-     * @return bool
-     */
-    public function linkChain(PointChain $other)
+    public function linkChain(PointChain $other): bool
     {
         $front = $this->begin();
         $back = $this->end();

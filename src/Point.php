@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 namespace MartinezRueda;
 
 /**
@@ -7,14 +10,18 @@ namespace MartinezRueda;
  */
 class Point
 {
-    public $x = null;
-    public $y = null;
+    /**
+     * @var float
+     */
+    public $x;
+
+    /**
+     * @var float
+     */
+    public $y;
 
     /**
      * Point constructor.
-     *
-     * @param float $x
-     * @param float $y
      */
     public function __construct(float $x = 0, float $y = 0)
     {
@@ -22,20 +29,12 @@ class Point
         $this->y = $y;
     }
 
-    /**
-     * @param Point $p
-     * @return bool
-     */
-    public function equalsTo(Point $p) : bool
+    public function equalsTo(Point $p): bool
     {
         return ($this->x === $p->x && $this->y === $p->y);
     }
 
-    /**
-     * @param Point $p
-     * @return float
-     */
-    public function distanceTo(Point $p) : float
+    public function distanceTo(Point $p): float
     {
         $dx = $this->x - $p->x;
         $dy = $this->y - $p->y;

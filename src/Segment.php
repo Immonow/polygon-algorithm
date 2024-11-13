@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 namespace MartinezRueda;
 
 /**
@@ -7,8 +10,9 @@ namespace MartinezRueda;
  */
 class Segment
 {
-    public $p1 = null;
-    public $p2 = null;
+    public $p1;
+
+    public $p2;
 
     public function __construct(Point $p1, Point $p2)
     {
@@ -16,33 +20,27 @@ class Segment
         $this->setEnd($p2);
     }
 
-    /**
-     * @param Point $p
-     */
-    public function setBegin(Point $p)
+    public function setBegin(Point $p): void
     {
         $this->p1 = $p;
     }
 
-    /**
-     * @param Point $p
-     */
-    public function setEnd(Point $p)
+    public function setEnd(Point $p): void
     {
         $this->p2 = $p;
     }
 
-    public function begin() : Point
+    public function begin(): Point
     {
         return $this->p1;
     }
 
-    public function end() : Point
+    public function end(): Point
     {
         return $this->p2;
     }
 
-    public function changeOrientation()
+    public function changeOrientation(): void
     {
         $tmp = $this->p1;
         $this->p1 = $this->p2;

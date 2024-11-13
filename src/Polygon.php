@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MartinezRueda;
 
 /**
@@ -94,30 +96,24 @@ class Polygon
         ];
     }
 
-    /**
-     * @return void
-     */
-    public function move(float $x, float $y)
+    public function move(float $x, float $y): void
     {
         for ($i = 0; $this->ncontours(); $i++) {
             $this->contours[$i]->move($x, $y);
         }
     }
 
-    public function push_back(Contour $contour)
+    public function push_back(Contour $contour): void
     {
         $this->contours[] = $contour;
     }
 
-    public function pop_back()
+    public function pop_back(): void
     {
         array_pop($this->contours);
     }
 
-    /**
-     * @return void
-     */
-    public function erase(int $index)
+    public function erase(int $index): void
     {
         unset($this->contours[$index]);
     }
@@ -125,7 +121,7 @@ class Polygon
     /**
      * Empty the polygon
      */
-    public function clear()
+    public function clear(): void
     {
         unset($this->contours);
     }

@@ -1,6 +1,10 @@
 <?php
 
+declare(strict_types=1);
+
 namespace MartinezRueda;
+
+use Exception;
 
 /**
  * Time complexity O((n+k) log n)
@@ -15,25 +19,25 @@ namespace MartinezRueda;
  */
 class Algorithm
 {
-    const OPERATION_INTERSECTION = 'INTERSECTION';
+    public const OPERATION_INTERSECTION = 'INTERSECTION';
 
-    const OPERATION_UNION = 'UNION';
+    public const OPERATION_UNION = 'UNION';
 
-    const OPERATION_DIFFERENCE = 'DIFFERENCE';
+    public const OPERATION_DIFFERENCE = 'DIFFERENCE';
 
-    const OPERATION_XOR = 'XOR';
+    public const OPERATION_XOR = 'XOR';
 
-    const POLYGON_TYPE_SUBJECT = 1;
+    public const POLYGON_TYPE_SUBJECT = 1;
 
-    const POLYGON_TYPE_CLIPPING = 2;
+    public const POLYGON_TYPE_CLIPPING = 2;
 
-    const EDGE_TYPE_NORMAL = 1;
+    public const EDGE_TYPE_NORMAL = 1;
 
-    const EDGE_TYPE_NON_CONTRIBUTING = 2;
+    public const EDGE_TYPE_NON_CONTRIBUTING = 2;
 
-    const EDGE_TYPE_SAME_TRANSITION = 3;
+    public const EDGE_TYPE_SAME_TRANSITION = 3;
 
-    const EDGE_TYPE_DIFFERENT_TRANSITION = 4;
+    public const EDGE_TYPE_DIFFERENT_TRANSITION = 4;
 
     /**
      * Deque
@@ -44,14 +48,11 @@ class Algorithm
      */
     protected $event_holder = [];
 
-    /**
-     * @var null|PriorityQueue
-     */
-    protected $eq = null;
+    protected PriorityQueue $eq;
 
     public function __construct()
     {
-        $this->eq = new PriorityQueue;
+        $this->eq = new PriorityQueue();
     }
 
     public function getDifference(Polygon $subject, Polygon $clipping): Polygon
@@ -80,12 +81,12 @@ class Algorithm
         $result = new Polygon([]);
         // Test for 1 trivial result case
         if ($subject->ncontours() * $clipping->ncontours() == 0) {
-            if ($operation == self::OPERATION_DIFFERENCE) {
+            if ($operation === self::OPERATION_DIFFERENCE) {
                 $result = $subject;
             }
 
-            if ($operation == self::OPERATION_UNION || $operation == self::OPERATION_XOR) {
-                $result = ($subject->ncontours() == 0) ? $clipping : $subject;
+            if ($operation === self::OPERATION_UNION || $operation === self::OPERATION_XOR) {
+                return ($subject->ncontours() == 0) ? $clipping : $subject;
             }
 
             return $result;
@@ -103,11 +104,11 @@ class Algorithm
         if ($minsubj->x > $maxclip->x || $minclip->x > $maxsubj->x
             || $minsubj->y > $maxclip->y || $minclip->y > $maxsubj->y) {
             // the bounding boxes do not overlap
-            if ($operation == self::OPERATION_DIFFERENCE) {
+            if ($operation === self::OPERATION_DIFFERENCE) {
                 $result = $subject;
             }
 
-            if ($operation == self::OPERATION_UNION || $operation == self::OPERATION_XOR) {
+            if ($operation === self::OPERATION_UNION || $operation === self::OPERATION_XOR) {
                 $result = $subject;
                 for ($i = 0; $i < $clipping->ncontours(); $i++) {
                     $result->push_back($clipping->contour($i));
@@ -132,13 +133,13 @@ class Algorithm
             }
         }
 
-        $connector = new Connector;
-        $sweepline = new SweepLine;
+        $connector = new Connector();
+        $sweepline = new SweepLine();
 
         $min_max_x = min($maxsubj->x, $maxclip->x);
 
         Debug::debug(
-            function () {
+            function (): void {
                 echo 'Initial queue:', PHP_EOL;
 
                 $i = 0;
@@ -153,14 +154,14 @@ class Algorithm
             $e = $this->eq->dequeue();
 
             Debug::debug(
-                function () use ($e) {
+                function () use ($e): void {
                     echo 'Process event:', PHP_EOL;
                     echo "\t", Debug::gatherSweepEventData($e), PHP_EOL;
                 }
             );
 
-            if (($operation == self::OPERATION_INTERSECTION && ($e->p->x > $min_max_x))
-                || ($operation == self::OPERATION_DIFFERENCE && ($e->p->x > $maxsubj->x))) {
+            if (($operation === self::OPERATION_INTERSECTION && ($e->p->x > $min_max_x))
+                || ($operation === self::OPERATION_DIFFERENCE && ($e->p->x > $maxsubj->x))) {
                 $result = $connector->toPolygon();
 
                 return $result;
@@ -213,7 +214,7 @@ class Algorithm
                 }
 
                 Debug::debug(
-                    function () use ($sweepline) {
+                    function () use ($sweepline): void {
                         echo 'Status line after insertion: ', PHP_EOL;
 
                         $i = 0;
@@ -289,14 +290,14 @@ class Algorithm
                         break; // end of EDGE_TYPE_NORMAL
 
                     case self::EDGE_TYPE_SAME_TRANSITION:
-                        if ($operation == self::OPERATION_INTERSECTION || $operation == self::OPERATION_UNION) {
+                        if ($operation === self::OPERATION_INTERSECTION || $operation === self::OPERATION_UNION) {
                             $connector->add($e->segment());
                         }
 
                         break;
 
                     case self::EDGE_TYPE_DIFFERENT_TRANSITION:
-                        if ($operation == self::OPERATION_DIFFERENCE) {
+                        if ($operation === self::OPERATION_DIFFERENCE) {
                             $connector->add($e->segment());
                         }
 
@@ -312,7 +313,7 @@ class Algorithm
                 }
 
                 Debug::debug(
-                    function () use ($connector) {
+                    function () use ($connector): void {
                         echo 'Connector:', PHP_EOL;
                         echo Debug::gatherConnectorData($connector), PHP_EOL;
                     }
@@ -429,20 +430,18 @@ class Algorithm
                 $w[1] = $u1 > $v1 ? $v1 : $u1;
 
                 return 2;
-            } else {
-                $w[0] = $u0;
-
-                return 1;
             }
-        } else {
-            $w[0] = $u1;
 
+            $w[0] = $u0;
             return 1;
         }
+
+        $w[0] = $u1;
+        return 1;
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     protected function possibleIntersection(SweepEvent $event1, SweepEvent $event2)
     {
@@ -451,12 +450,12 @@ class Algorithm
         //    return false;
         // }
 
-        $ip1 = new Point;
-        $ip2 = new Point;
+        $ip1 = new Point();
+        $ip2 = new Point();
 
         $intersections = $this->findIntersection($event1->segment(), $event2->segment(), $ip1, $ip2);
 
-        if (empty($intersections)) {
+        if ($intersections === 0) {
             return;
         }
 
@@ -467,7 +466,7 @@ class Algorithm
         // the line segments overlap, but they belong to the same polygon
         // the program does not work with this kind of polygon
         if ($intersections == 2 && $event1->polygon_type == $event2->polygon_type) {
-            throw new \Exception('Polygon has overlapping edges.');
+            throw new Exception('Polygon has overlapping edges.');
         }
 
         if ($intersections == 1) {
@@ -506,17 +505,20 @@ class Algorithm
         }
 
         if (count($sorted_events) == 2) {
-            $event1->edge_type = $event1->other->edge_type = self::EDGE_TYPE_NON_CONTRIBUTING;
-            $event2->edge_type = $event2->other->edge_type = ($event1->in_out == $event2->in_out)
+            $event1->edge_type = self::EDGE_TYPE_NON_CONTRIBUTING;
+            $event1->other->edge_type = self::EDGE_TYPE_NON_CONTRIBUTING;
+            $event2->edge_type = ($event1->in_out == $event2->in_out)
                 ? self::EDGE_TYPE_SAME_TRANSITION
                 : self::EDGE_TYPE_DIFFERENT_TRANSITION;
-
+            $event2->other->edge_type = ($event1->in_out == $event2->in_out)
+                ? self::EDGE_TYPE_SAME_TRANSITION
+                : self::EDGE_TYPE_DIFFERENT_TRANSITION;
             return;
         }
 
         if (count($sorted_events) == 3) {
-            $sorted_events[1]->edge_type = $sorted_events[1]->other->edge_type = self::EDGE_TYPE_NON_CONTRIBUTING;
-
+            $sorted_events[1]->edge_type = self::EDGE_TYPE_NON_CONTRIBUTING;
+            $sorted_events[1]->other->edge_type = self::EDGE_TYPE_NON_CONTRIBUTING;
             if ($sorted_events[0]) {
                 $sorted_events[0]->other->edge_type = ($event1->in_out == $event2->in_out)
                     ? self::EDGE_TYPE_SAME_TRANSITION
@@ -527,8 +529,7 @@ class Algorithm
                     : self::EDGE_TYPE_DIFFERENT_TRANSITION;
             }
 
-            $this->divideSegment($sorted_events[0] ? $sorted_events[0] : $sorted_events[2]->other, $sorted_events[1]->p);
-
+            $this->divideSegment($sorted_events[0] ?: $sorted_events[2]->other, $sorted_events[1]->p);
             return;
         }
 
@@ -544,7 +545,8 @@ class Algorithm
             return;
         }
 
-        $sorted_events[1]->type = $sorted_events[1]->other->type = self::EDGE_TYPE_NON_CONTRIBUTING;
+        $sorted_events[1]->type = self::EDGE_TYPE_NON_CONTRIBUTING;
+        $sorted_events[1]->other->type = self::EDGE_TYPE_NON_CONTRIBUTING;
         $this->divideSegment($sorted_events[0], $sorted_events[1]->p);
 
         $sorted_events[3]->other->type = ($event1->in_out == $event2->in_out)
