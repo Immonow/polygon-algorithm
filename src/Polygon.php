@@ -26,6 +26,9 @@ class Polygon
         foreach ($contours_xy as $contour_xy) {
             $contour_points = [];
             foreach ($contour_xy as $xy) {
+                if (!is_array($xy)) {
+                    throw new \InvalidArgumentException("Wrong array formation. Your point: " . $xy);
+                }
                 $contour_points[] = new Point($xy[0], $xy[1]);
             }
 

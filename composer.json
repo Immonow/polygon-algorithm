@@ -1,8 +1,17 @@
 {
   "name": "immonow/martinez-rueda-php",
   "description": "Martinez-Rueda algorithm for polygon boolean operations",
-  "keywords": ["polygon clipping", "polygon boolean operations", "polygon union", "polygon intersection",
-    "polygon difference", "polygon xor", "geography", "martinez polygon algorithm", "martinez php"],
+  "keywords": [
+    "polygon clipping",
+    "polygon boolean operations",
+    "polygon union",
+    "polygon intersection",
+    "polygon difference",
+    "polygon xor",
+    "geography",
+    "martinez polygon algorithm",
+    "martinez php"
+  ],
   "type": "library",
   "authors": [
     {
@@ -19,11 +28,17 @@
     "phpunit/php-code-coverage": "^10.1",
     "phpstan/phpstan": "1.12.5",
     "rector/rector": "1.2.10",
-    "friendsofphp/php-cs-fixer": "^3.64"
+    "friendsofphp/php-cs-fixer": "^3.64",
+    "spatie/phpunit-snapshot-assertions": "^5.1"
   },
   "autoload": {
     "psr-4": {
       "MartinezRueda\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\": "tests/"
     }
   }
 }

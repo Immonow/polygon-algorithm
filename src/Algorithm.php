@@ -49,6 +49,11 @@ class Algorithm
         $this->eq = new PriorityQueue();
     }
 
+    public function setEventHolder(array $events): void
+    {
+        $this->event_holder = $events;
+    }
+
     public function getDifference(Polygon $subject, Polygon $clipping): Polygon
     {
         return $this->compute($subject, $clipping, self::OPERATION_DIFFERENCE);
@@ -95,8 +100,10 @@ class Algorithm
         $minclip = $box['min'];
         $maxclip = $box['max'];
 
-        if ($minsubj->x > $maxclip->x || $minclip->x > $maxsubj->x
-            || $minsubj->y > $maxclip->y || $minclip->y > $maxsubj->y) {
+        if (
+            $minsubj->x > $maxclip->x || $minclip->x > $maxsubj->x
+            || $minsubj->y > $maxclip->y || $minclip->y > $maxsubj->y
+        ) {
             // the bounding boxes do not overlap
             if ($operation === self::OPERATION_DIFFERENCE) {
                 $result = $subject;
@@ -132,30 +139,32 @@ class Algorithm
 
         $min_max_x = min($maxsubj->x, $maxclip->x);
 
-        Debug::debug(
-            function (): void {
-                echo 'Initial queue:', PHP_EOL;
+        // Debug::debug(
+        //     function (): void {
+        //         echo 'Initial queue:', PHP_EOL;
 
-                $i = 0;
+        //         $i = 0;
 
-                foreach ($this->eq->events as $sweep_event) {
-                    echo "\t", ++$i, ' - ', Debug::gatherSweepEventData($sweep_event), PHP_EOL;
-                }
-            }
-        );
+        //         foreach ($this->eq->events as $sweep_event) {
+        //             echo "\t", ++$i, ' - ', Debug::gatherSweepEventData($sweep_event), PHP_EOL;
+        //         }
+        //     }
+        // );
 
-        while (! $this->eq->isEmpty()) {
+        while (!$this->eq->isEmpty()) {
             $e = $this->eq->dequeue();
 
-            Debug::debug(
-                function () use ($e): void {
-                    echo 'Process event:', PHP_EOL;
-                    echo "\t", Debug::gatherSweepEventData($e), PHP_EOL;
-                }
-            );
+            // Debug::debug(
+            //     function () use ($e): void {
+            //         echo 'Process event:', PHP_EOL;
+            //         echo "\t", Debug::gatherSweepEventData($e), PHP_EOL;
+            //     }
+            // );
 
-            if (($operation === self::OPERATION_INTERSECTION && ($e->p->x > $min_max_x))
-                || ($operation === self::OPERATION_DIFFERENCE && ($e->p->x > $maxsubj->x))) {
+            if (
+                ($operation === self::OPERATION_INTERSECTION && ($e->p->x > $min_max_x))
+                || ($operation === self::OPERATION_DIFFERENCE && ($e->p->x > $maxsubj->x))
+            ) {
                 $result = $connector->toPolygon();
 
                 return $result;
@@ -192,38 +201,38 @@ class Algorithm
                         $prev2 = $sweepline->get($position - 2);
 
                         if ($prev->polygon_type == $e->polygon_type) {
-                            $e->in_out = ! $prev->in_out;
-                            $e->inside = ! $prev2->in_out;
+                            $e->in_out = !$prev->in_out;
+                            $e->inside = !$prev2->in_out;
                         } else {
-                            $e->in_out = ! $prev2->in_out;
-                            $e->inside = ! $prev->in_out;
+                            $e->in_out = !$prev2->in_out;
+                            $e->inside = !$prev->in_out;
                         }
                     }
                 } elseif ($e->polygon_type == $prev->polygon_type) {
                     $e->inside = $prev->inside;
-                    $e->in_out = ! $prev->in_out;
+                    $e->in_out = !$prev->in_out;
                 } else {
-                    $e->inside = ! $prev->in_out;
+                    $e->inside = !$prev->in_out;
                     $e->in_out = $prev->inside;
                 }
 
-                Debug::debug(
-                    function () use ($sweepline): void {
-                        echo 'Status line after insertion: ', PHP_EOL;
+                // Debug::debug(
+                //     function () use ($sweepline): void {
+                //         echo 'Status line after insertion: ', PHP_EOL;
 
-                        $i = 0;
+                //         $i = 0;
 
-                        foreach ($sweepline->events as $sweep_event) {
-                            echo "\t", ++$i, ' - ', Debug::gatherSweepEventData($sweep_event), PHP_EOL;
-                        }
-                    }
-                );
+                //         foreach ($sweepline->events as $sweep_event) {
+                //             echo "\t", ++$i, ' - ', Debug::gatherSweepEventData($sweep_event), PHP_EOL;
+                //         }
+                //     }
+                // );
 
-                if (! is_null($next)) {
+                if (!is_null($next)) {
                     $this->possibleIntersection($e, $next);
                 }
 
-                if (! is_null($prev)) {
+                if (!is_null($prev)) {
                     $this->possibleIntersection($prev, $e);
                 }
             } else { // not left, the line segment must be removed from S
@@ -246,7 +255,7 @@ class Algorithm
                     $next = null;
 
                     if ($other_pos < count($sweepline->events) - 1) {
-                        $next = $sweepline->get($other_pos + 1);
+                        $next = $sweepline->get((int) $other_pos + 1);
                     }
                 }
 
@@ -262,15 +271,17 @@ class Algorithm
                                 break;
 
                             case self::OPERATION_UNION:
-                                if (! $e->other->inside) {
+                                if (!$e->other->inside) {
                                     $connector->add($e->segment());
                                 }
 
                                 break;
 
                             case self::OPERATION_DIFFERENCE:
-                                if ($e->polygon_type == self::POLYGON_TYPE_SUBJECT && ! $e->other->inside
-                                    || $e->polygon_type == self::POLYGON_TYPE_CLIPPING && $e->other->inside) {
+                                if (
+                                    $e->polygon_type == self::POLYGON_TYPE_SUBJECT && !$e->other->inside
+                                    || $e->polygon_type == self::POLYGON_TYPE_CLIPPING && $e->other->inside
+                                ) {
                                     $connector->add($e->segment());
                                 }
 
@@ -302,16 +313,16 @@ class Algorithm
                     $sweepline->remove($sweepline->get($other_pos));
                 }
 
-                if (! is_null($next) && ! is_null($prev)) {
+                if (!is_null($next) && !is_null($prev)) {
                     $this->possibleIntersection($next, $prev);
                 }
 
-                Debug::debug(
-                    function () use ($connector): void {
-                        echo 'Connector:', PHP_EOL;
-                        echo Debug::gatherConnectorData($connector), PHP_EOL;
-                    }
-                );
+                // Debug::debug(
+                //     function () use ($connector): void {
+                //         echo 'Connector:', PHP_EOL;
+                //         echo Debug::gatherConnectorData($connector), PHP_EOL;
+                //     }
+                // );
             }
         }
 
@@ -464,11 +475,11 @@ class Algorithm
         }
 
         if ($intersections == 1) {
-            if (! $event1->p->equalsTo($ip1) && ! $event1->other->p->equalsTo($ip1)) {
+            if (!$event1->p->equalsTo($ip1) && !$event1->other->p->equalsTo($ip1)) {
                 $this->divideSegment($event1, $ip1);
             }
 
-            if (! $event2->p->equalsTo($ip1) && ! $event2->other->p->equalsTo($ip1)) {
+            if (!$event2->p->equalsTo($ip1) && !$event2->other->p->equalsTo($ip1)) {
                 $this->divideSegment($event2, $ip1);
             }
 
@@ -527,7 +538,7 @@ class Algorithm
             return;
         }
 
-        if (! $sorted_events[0]->equalsTo($sorted_events[3]->other)) {
+        if (!$sorted_events[0]->equalsTo($sorted_events[3]->other)) {
             $sorted_events[1]->type = self::EDGE_TYPE_NON_CONTRIBUTING;
             $sorted_events[2]->type = ($event1->in_out == $event2->in_out)
                 ? self::EDGE_TYPE_SAME_TRANSITION
