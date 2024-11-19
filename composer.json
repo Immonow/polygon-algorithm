@@ -13,6 +13,7 @@
     "martinez php"
   ],
   "type": "library",
+  "license": "MIT",
   "authors": [
     {
       "name": "Lena Stadlinger",
