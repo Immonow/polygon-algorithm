@@ -1,6 +1,3 @@
-# https://help.github.com/en/categories/automating-your-workflow-with-github-actions
-# https://github.com/sebastianbergmann/php-code-coverage/blob/main/.github/workflows/ci.yml
-
 name: PHP Composer
 
 on:
@@ -13,10 +10,19 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: [8.0, 8.1, 8.2]
     steps:
-      - uses: actions/checkout@v4
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
         with:
-          php-version: 8.2
+          php-version: ${{ matrix.php }}
+          tools: composer, phpunit
+          coverage: xdebug
+
+      - name: Checkout code
+        uses: actions/checkout@v4
 
       - name: Validate composer.json and composer.lock
         run: composer validate --strict
@@ -26,17 +32,13 @@ jobs:
         uses: actions/cache@v3
         with:
           path: vendor
-          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          key: ${{ runner.os }}-php-${{ matrix.php }}-${{ hashFiles('**/composer.lock') }}
           restore-keys: |
-            ${{ runner.os }}-php-
+            ${{ runner.os }}-php-${{ matrix.php }}-
 
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress
 
-  test:
-    runs-on: ubuntu-latest
-
-    steps:
       - name: Run test suite
         run: composer run-script test
 
