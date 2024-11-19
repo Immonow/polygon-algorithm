@@ -31,6 +31,20 @@
     "friendsofphp/php-cs-fixer": "^3.64",
     "spatie/phpunit-snapshot-assertions": "^5.1"
   },
+  "scripts": {
+    "coverage": [
+      "Composer\\Config::disableProcessTimeout",
+      "vendor/bin/phpunit --coverage-html coverage"
+    ],
+    "test": [
+      "Composer\\Config::disableProcessTimeout",
+      "vendor/bin/phpunit"
+    ],
+    "phpstan": [
+      "Composer\\Config::disableProcessTimeout",
+      "phpstan analyse --memory-limit=2G  --error-format=prettyJson > coverage/phpstan.json"
+    ]
+  },
   "autoload": {
     "psr-4": {
       "MartinezRueda\\": "src/"
@@ -39,6 +53,15 @@
   "autoload-dev": {
     "psr-4": {
       "Tests\\": "tests/"
+    }
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true,
+  "config": {
+    "optimize-autoloader": true,
+    "sort-packages": true,
+    "allow-plugins": {
+      "phpstan/extension-installer": true
     }
   }
 }
