@@ -229,11 +229,11 @@ class Algorithm
                 // );
 
                 if (!is_null($next)) {
-                    $this->possibleIntersection($e, $next);
+                    $this->possibleIntersection($e, $next, $operation);
                 }
 
                 if (!is_null($prev)) {
-                    $this->possibleIntersection($prev, $e);
+                    $this->possibleIntersection($prev, $e, $operation);
                 }
             } else { // not left, the line segment must be removed from S
                 $other_pos = -1;
@@ -314,7 +314,7 @@ class Algorithm
                 }
 
                 if (!is_null($next) && !is_null($prev)) {
-                    $this->possibleIntersection($next, $prev);
+                    $this->possibleIntersection($next, $prev, $operation);
                 }
 
                 // Debug::debug(
@@ -448,7 +448,7 @@ class Algorithm
     /**
      * @throws Exception
      */
-    protected function possibleIntersection(SweepEvent $event1, SweepEvent $event2)
+    protected function possibleIntersection(SweepEvent $event1, SweepEvent $event2, string $operation)
     {
         // uncomment these two lines if self-intersecting polygons are not allowed
         // if ($event1->polygon_type == $event2->polygon_type) {
@@ -471,6 +471,9 @@ class Algorithm
         // the line segments overlap, but they belong to the same polygon
         // the program does not work with this kind of polygon
         if ($intersections == 2 && $event1->polygon_type == $event2->polygon_type) {
+            if ($operation === self::OPERATION_UNION) {
+                return;
+            }
             throw new Exception('Polygon has overlapping edges.');
         }
 
